@@ -6,6 +6,8 @@ A <Alert> component for react-native
 
 Version 0.x recommends react-native >= 0.57.0
 
+![](./demo.gif)
+
 #### Installation
 
 ------
