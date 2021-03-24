@@ -1,0 +1,23 @@
+{
+  "name": "@weedx/react-native-alert-view",
+  "version": "0.1.0",
+  "description": "react native alert component, pure javascript solution",
+  "main": "./src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "react-native",
+    "alert",
+    "alertView"
+  ],
+  "author": "weedx",
+  "license": "MIT",
+  "dependencies": {
+    "react-native-animated-overlay": "0.0.10",
+    "react-native-root-siblings": "^4.1.0"
+  },
+  "peerDependencies": {
+    "react-native": ">=0.57.0"
+  }
+}
