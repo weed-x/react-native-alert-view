@@ -1,4 +1,4 @@
-### react-native-custom-alert-view
+### @weedx/react-native-alert-view
 
 ------
 
@@ -15,13 +15,13 @@ Version 0.x recommends react-native >= 0.57.0
 Using npm:
 
 ```
-npm install --save react-native-custom-alert-view
+npm install --save @weedx/react-native-alert-view
 ```
 
 or using yarn:
 
 ```
-yarn add react-native-custom-alert-view
+yarn add @weedx/react-native-alert-view
 ```
 
 #### Usage
@@ -31,7 +31,7 @@ yarn add react-native-custom-alert-view
 1.pass string to message:
 
 ```javascript
-import AlertViewManager from 'react-native-custom-alert-view';
+import AlertViewManager from '@weedx/react-native-alert-view';
 AlertViewManager.show(
   '提示',
   '一段提示文字',
@@ -41,7 +41,7 @@ AlertViewManager.show(
 2.pass element to message:
 
 ```javascript
-import AlertViewManager from 'react-native-custom-alert-view';
+import AlertViewManager from '@weedx/react-native-alert-view';
 AlertViewManager.show(
   '提示',
   <View>
@@ -53,7 +53,7 @@ AlertViewManager.show(
 3.pass options & event to alertView:
 
 ```javascript
-import AlertViewManager from 'react-native-custom-alert-view';
+import AlertViewManager from '@weedx/react-native-alert-view';
 AlertViewManager.show(
   '提示',
   '一段提示文字',
