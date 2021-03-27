@@ -29,6 +29,7 @@ yarn add @weedx/react-native-alert-view
 ------
 
 1.pass string to message:
+for 0.1.x:
 
 ```javascript
 import AlertViewManager from '@weedx/react-native-alert-view';
@@ -38,7 +39,18 @@ AlertViewManager.show(
 );
 ```
 
+for 0.2.x:
+
+```javascript
+import AlertViewManager from '@weedx/react-native-alert-view';
+AlertViewManager.show({
+  title:'提示',
+  message: '一段提示文字',
+});
+```
+
 2.pass element to message:
+for 0.1.x:
 
 ```javascript
 import AlertViewManager from '@weedx/react-native-alert-view';
@@ -49,8 +61,20 @@ AlertViewManager.show(
   </View>,
 );
 ```
+for 0.2.x:
+
+```javascript
+import AlertViewManager from '@weedx/react-native-alert-view';
+AlertViewManager.show({
+  title: '提示',
+  message: <View>
+  	<Text>一段提示文字</Text>
+  </View>,
+});
+```
 
 3.pass options & event to alertView:
+for 0.1.x:
 
 ```javascript
 import AlertViewManager from '@weedx/react-native-alert-view';
@@ -69,6 +93,25 @@ AlertViewManager.show(
     console.log('处理cancel')
   }
 );
+```
+
+for 0.2.x:
+
+```javascript
+import AlertViewManager from '@weedx/react-native-alert-view';
+AlertViewManager.show({
+  title: '提示',
+  message: '一段提示文字',
+  cancelText: '取消',
+  confirmText: '确认'
+  ...,
+  onConfirmPressed: () => {
+    console.log('处理confirm')
+  },
+  onCancelPressed: () => {
+    console.log('处理cancel')
+  }
+});
 ```
 
 ##### Configurable props

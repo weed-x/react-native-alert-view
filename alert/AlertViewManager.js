@@ -16,18 +16,15 @@ export default class AlertViewManager {
     this.alerts.push(currentAlert);
   }
 
-  create(props) {
-    this.setCurrent(props);
-    this.props.push(props);
-  }
-
-  update = (title, message, options, onConfirmPressed, onCancelPressed) => {
+  update = options => {
+    if (this.alerts.length <= 0) {
+      console.error('alert instance is not existed');
+      return;
+    }
     const props = {
-      title,
-      message,
       ...options,
-      onCancelPressed: onCancelPressed || this.hide,
-      onConfirmPressed: onConfirmPressed || this.hide,
+      onCancelPressed: options.onCancelPressed || this.hide,
+      onConfirmPressed: options.onConfirmPressed || this.hide,
       show: true,
       onHide: () => {
         this.alerts.pop().destroy();
@@ -35,26 +32,25 @@ export default class AlertViewManager {
         if (!p) {
           return;
         }
-        this.setCurrent(this.props[this.props.length] - 1);
+        this.setCurrent(this.props[this.props.length - 1]);
       },
     };
     this.props[this.props.length - 1] = props;
     this.alerts[this.alerts.length - 1].update(<AlertView {...props} />);
   };
 
-  show = (title, message, options, onConfirmPressed, onCancelPressed) => {
+  show = options => {
     const props = {
-      title,
-      message,
       ...options,
-      onCancelPressed: onCancelPressed || this.hide,
-      onConfirmPressed: onConfirmPressed || this.hide,
+      onCancelPressed: options.onCancelPressed || this.hide,
+      onConfirmPressed: options.onConfirmPressed || this.hide,
       show: true,
       onHide: () => {
         this.hide();
       },
     };
-    this.create(props);
+    this.setCurrent(props);
+    this.props.push(props);
   };
 
   hide = () => {
@@ -63,6 +59,6 @@ export default class AlertViewManager {
       return;
     }
     this.alerts.pop().destroy();
-    this.setCurrent(this.props[this.props.length] - 1);
+    this.setCurrent(this.props[this.props.length - 1]);
   };
 }

@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   StyleSheet,
   View,
@@ -19,79 +19,75 @@ const ALERT_CLOSED = 'alert_closed';
 const DEFAULT_ANIMATION_DURATION = 180;
 const HARDWARE_BACK_PRESS_EVENT = 'hardwareBackPress';
 
-export default class AlertView extends Component {
-  state = {
-    alertState: ALERT_CLOSED,
-    scale: new Animated.Value(0),
-    canclePressed: false,
-    confirmPressed: false,
-  };
-  componentDidMount() {
-    if (this.props.show) {
-      this.show();
+const AlertView = props => {
+  const {
+    show,
+    hideOnHardwareBackPress,
+    onHide,
+    animationDuration,
+    overlayOpacity,
+  } = props;
+  const [alertState, setAlertState] = useState(ALERT_CLOSED);
+  const [scale] = useState(new Animated.Value(0));
+  const [cancelPressed, setCancelPressed] = useState(false);
+  const [confirmPressed, setConfirmPressed] = useState(false);
+  const [overlayShow, setOverlayShow] = useState(false);
+  const [pointerEvents, setPointerEvents] = useState('none');
+
+  useEffect(() => {
+    if (show) {
+      showAlert();
+    }
+  }, [show, showAlert]);
+
+  useEffect(() => {
+    function hardwareBackPressHandler() {
+      if (hideOnHardwareBackPress && show) {
+        onHide();
+      }
     }
     BackHandler.addEventListener(
       HARDWARE_BACK_PRESS_EVENT,
-      this.hardwareBackPressHandler,
+      hardwareBackPressHandler,
     );
-  }
+    return () => {
+      BackHandler.removeEventListener(HARDWARE_BACK_PRESS_EVENT);
+    };
+  }, [hideOnHardwareBackPress, show, onHide]);
 
-  componentWillUnmount() {
-    BackHandler.removeEventListener(HARDWARE_BACK_PRESS_EVENT);
-    this.hide();
-  }
+  useEffect(() => {
+    if ([ALERT_OPENED, ALERT_OPENING].includes(alertState)) {
+      setOverlayShow(true);
+      setPointerEvents('auto');
+    } else {
+      setOverlayShow(false);
+      setPointerEvents('none');
+    }
+  }, [alertState]);
 
-  onOverlayPress = () => {
-    if (this.state.alertState === ALERT_OPENED) {
-      this.hide();
+  const onOverlayPress = () => {
+    if (alertState === ALERT_OPENED) {
+      onHide();
     }
   };
 
-  setAlertState(toValue) {
-    const isClosed = this.state.alertState === ALERT_CLOSED;
-    let alertState = isClosed ? ALERT_OPENING : ALERT_CLOSING;
-    this.setState({alertState});
-    Animated.spring(this.state.scale, {
-      toValue,
+  const showAlert = useCallback(() => {
+    if ([ALERT_OPENING, ALERT_OPENED].includes(alertState)) {
+      return;
+    }
+    const isClosed = alertState === ALERT_CLOSED;
+    setAlertState(isClosed ? ALERT_OPENING : ALERT_CLOSING);
+    Animated.spring(scale, {
+      toValue: 1,
       friction: 5,
       useNativeDriver: true,
     }).start(() => {
-      const isClosing = this.state.alertState === ALERT_CLOSING;
-      alertState = isClosing ? ALERT_CLOSED : ALERT_OPENED;
-      this.setState({alertState});
+      const isClosing = alertState === ALERT_CLOSING;
+      setAlertState(isClosing ? ALERT_CLOSED : ALERT_OPENED);
     });
-  }
+  }, [alertState, scale]);
 
-  hardwareBackPressHandler = () => {
-    let {hideOnHardwareBackPress, onHide} = this.props;
-    if (hideOnHardwareBackPress && this.props.show) {
-      if (onHide) {
-        onHide();
-      } else {
-        this.hide();
-      }
-      return true;
-    }
-    return false;
-  };
-
-  show = () => {
-    if ([ALERT_OPENING, ALERT_OPENED].includes(this.state.alertState)) {
-      return;
-    }
-    this.setState({show: true});
-    this.setAlertState(1);
-  };
-
-  hide = () => {
-    if ([ALERT_CLOSING, ALERT_CLOSED].includes(this.state.alertState)) {
-      return;
-    }
-    this.setState({show: false});
-    this.setAlertState(0);
-  };
-
-  renderContent = () => {
+  const renderContent = () => {
     const {
       title,
       message,
@@ -105,7 +101,7 @@ export default class AlertView extends Component {
       confirmStyle,
       onCancelPressed,
       onConfirmPressed,
-    } = this.props;
+    } = props;
     const underlayStyle = {
       backgroundColor: '#f3f3f3',
     };
@@ -129,33 +125,27 @@ export default class AlertView extends Component {
         <View style={styles.handleView}>
           {!singleClick && (
             <TouchableOpacity
-              style={[
-                styles.cancelWrapper,
-                this.state.canclePressed && underlayStyle,
-              ]}
+              style={[styles.cancelWrapper, cancelPressed && underlayStyle]}
               activeOpacity={1}
               onPress={onCancelPressed}
               onPressIn={() => {
-                this.setState({canclePressed: true});
+                setCancelPressed(true);
               }}
               onPressOut={() => {
-                this.setState({canclePressed: false});
+                setCancelPressed(false);
               }}>
               <Text style={[styles.cancelText, cancelStyle]}>{cancelText}</Text>
             </TouchableOpacity>
           )}
           <TouchableOpacity
-            style={[
-              styles.cancelWrapper,
-              this.state.confirmPressed && underlayStyle,
-            ]}
+            style={[styles.cancelWrapper, confirmPressed && underlayStyle]}
             activeOpacity={1}
             onPress={onConfirmPressed}
             onPressIn={() => {
-              this.setState({confirmPressed: true});
+              setConfirmPressed(true);
             }}
             onPressOut={() => {
-              this.setState({confirmPressed: false});
+              setConfirmPressed(false);
             }}>
             <Text style={[styles.confirmText, confirmStyle]}>
               {confirmText}
@@ -166,51 +156,43 @@ export default class AlertView extends Component {
     );
   };
 
-  render() {
-    const {
-      animationDuration,
-      overlayOpacity,
-      hideOnHardwareBackPress,
-    } = this.props;
-    const {alertState, scale} = this.state;
-    let overlayShow = false;
-    let pointerEvents = 'none';
-    if ([ALERT_OPENED, ALERT_OPENING].includes(alertState)) {
-      overlayShow = true;
-      pointerEvents = 'auto';
-    }
+  // let overlayShow = false;
+  // let pointerEvents = 'none';
+  // if ([ALERT_OPENED, ALERT_OPENING].includes(alertState)) {
+  //   overlayShow = true;
+  //   pointerEvents = 'auto';
+  // }
 
-    return (
-      <View style={styles.container}>
-        <AnimatedOverlay
-          onPress={
-            hideOnHardwareBackPress ? this.hardwareBackPressHandler : () => {}
-          }
-          overlayShow={overlayShow}
-          duration={animationDuration}
-          opacity={overlayOpacity}
-          pointerEvents={pointerEvents}
-          useNativeDirver
-        />
-        {overlayShow && (
-          <Animated.View
-            style={[
-              styles.alertStyle,
-              {
-                transform: [
-                  {
-                    scale,
-                  },
-                ],
-              },
-            ]}>
-            {this.renderContent()}
-          </Animated.View>
-        )}
-      </View>
-    );
-  }
-}
+  return (
+    <View style={styles.container}>
+      <AnimatedOverlay
+        onPress={hideOnHardwareBackPress ? onOverlayPress : () => {}}
+        overlayShow={overlayShow}
+        duration={animationDuration}
+        opacity={overlayOpacity}
+        pointerEvents={pointerEvents}
+        useNativeDirver
+      />
+      {overlayShow && (
+        <Animated.View
+          style={[
+            styles.alertStyle,
+            {
+              transform: [
+                {
+                  scale,
+                },
+              ],
+            },
+          ]}>
+          {renderContent()}
+        </Animated.View>
+      )}
+    </View>
+  );
+};
+
+export default AlertView;
 
 AlertView.propTypes = {
   show: propTypes.bool,
